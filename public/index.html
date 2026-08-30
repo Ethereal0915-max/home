@@ -1,658 +1,448 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>逻辑猜门游戏</title>
-<style>
-  /* ===== 全局样式 ===== */
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: #f5f7fa;
-    color: #2c3e50;
-    line-height: 1.6;
-    min-height: 100vh;
-    padding: 16px;
-  }
-  .container {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-  h1 {
-    text-align: center;
-    font-size: 1.6rem;
-    color: #1a202c;
-    margin-bottom: 20px;
-    font-weight: 700;
-  }
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Hello, I'm Ethereal</title>
+    <link rel="icon" href="favicon.ico">
+    <meta name="description" content="Ethereal's website">
+    <meta name="keywords" content="Ethereal,Personal_Website">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="./static/css/style.css?v=1.33">
 
-  /* ===== 卡片通用样式 ===== */
-  .card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .card h2 {
-    font-size: 1.1rem;
-    color: #2d3748;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #edf2f7;
-    font-weight: 600;
-  }
+    <script data-host="https://tj.ms" data-dnt="false" src="https://tj.ms/js/script.js" id="ZwSg9rf6GA" async defer></script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?670aa16614778cea22ff9262814175a1";
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 
-  /* ===== 游戏说明区 ===== */
-  .rules p {
-    font-size: 0.92rem;
-    color: #4a5568;
-    margin-bottom: 6px;
-  }
-  .rules .highlight {
-    color: #d69e2e;
-    font-weight: 600;
-  }
+    <script>
+        (function() {
+            var theme = document.cookie.match(/themeState=([^;]+)/);
+            if (theme && theme[1] === "Dark") {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 
-  /* ===== 状态提示 ===== */
-  .status-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .status-tag {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-  .tag-questions { background: #ebf8ff; color: #2b6cb0; }
-  .tag-phase { background: #f0fff4; color: #2f855a; }
-  .tag-phase.locked { background: #fff5f5; color: #c53030; }
-
-  /* ===== 提问选择区 ===== */
-  .question-area {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .select-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .select-row label {
-    font-size: 0.9rem;
-    color: #4a5568;
-    font-weight: 500;
-    min-width: 50px;
-  }
-  select {
-    padding: 8px 14px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    background: #fff;
-    color: #2d3748;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    min-width: 80px;
-  }
-  select:focus { outline: none; border-color: #4299e1; }
-  select:disabled { background: #f7fafc; cursor: not-allowed; opacity: 0.6; }
-
-  .btn {
-    padding: 10px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-primary {
-    background: #4299e1;
-    color: #fff;
-  }
-  .btn-primary:hover:not(:disabled) { background: #3182ce; transform: translateY(-1px); }
-  .btn-success {
-    background: #48bb78;
-    color: #fff;
-  }
-  .btn-success:hover:not(:disabled) { background: #38a169; transform: translateY(-1px); }
-  .btn-warning {
-    background: #ed8936;
-    color: #fff;
-  }
-  .btn-warning:hover:not(:disabled) { background: #dd6b20; }
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  /* ===== 历史记录区 ===== */
-  .history-list {
-    list-style: none;
-  }
-  .history-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: #f7fafc;
-    font-size: 0.9rem;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .history-item .round-num {
-    font-weight: 700;
-    color: #718096;
-    min-width: 40px;
-  }
-  .history-item .question-text {
-    flex: 1;
-    color: #2d3748;
-    min-width: 160px;
-  }
-  .history-item .answer {
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-  }
-  .answer-yes { background: #c6f6d5; color: #22543d; }
-  .answer-no { background: #fed7d7; color: #742a2a; }
-
-  .empty-hint {
-    text-align: center;
-    color: #a0aec0;
-    font-size: 0.9rem;
-    padding: 20px 0;
-  }
-
-  /* ===== 猜答案区 ===== */
-  .guess-area {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .guess-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  /* ===== 结果提示 ===== */
-  .result-banner {
-    text-align: center;
-    padding: 16px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-  }
-  .result-win { background: #c6f6d5; color: #22543d; }
-  .result-lose { background: #fed7d7; color: #742a2a; }
-
-  /* ===== 复盘表格 ===== */
-  .review-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-  }
-  .review-table th, .review-table td {
-    padding: 10px 8px;
-    text-align: center;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  .review-table th {
-    background: #edf2f7;
-    color: #2d3748;
-    font-weight: 600;
-  }
-  .review-table .lie-row {
-    background: #fffaf0;
-  }
-  .lie-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.78rem;
-    font-weight: 700;
-  }
-  .lie-yes { background: #feebc8; color: #7b341e; }
-  .lie-no { background: #e2e8f0; color: #4a5568; }
-
-  /* ===== 推理过程 ===== */
-  .reasoning-box {
-    background: #f0fff4;
-    border-left: 4px solid #48bb78;
-    padding: 14px 16px;
-    border-radius: 0 8px 8px 0;
-    margin-top: 14px;
-    font-size: 0.9rem;
-  }
-  .reasoning-box h3 {
-    font-size: 0.95rem;
-    color: #22543d;
-    margin-bottom: 8px;
-  }
-  .reasoning-box p {
-    color: #2d3748;
-    margin-bottom: 6px;
-  }
-  .reasoning-box .door-check {
-    display: inline-block;
-    margin: 2px 6px 2px 0;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.82rem;
-    font-weight: 600;
-  }
-  .door-possible { background: #c6f6d5; color: #22543d; }
-  .door-impossible { background: #fed7d7; color: #742a2a; text-decoration: line-through; }
-
-  /* ===== 重新开始按钮 ===== */
-  .restart-area {
-    text-align: center;
-    margin-top: 8px;
-  }
-
-  /* ===== 移动端适配 ===== */
-  @media (max-width: 480px) {
-    body { padding: 10px; }
-    .card { padding: 14px; }
-    h1 { font-size: 1.3rem; }
-    .select-row label { min-width: auto; }
-    select { min-width: 70px; padding: 7px 10px; }
-    .btn { padding: 9px 18px; font-size: 0.9rem; }
-    .review-table { font-size: 0.8rem; }
-    .review-table th, .review-table td { padding: 8px 4px; }
-  }
-</style>
 </head>
 <body>
-<div class="container">
-  <h1>🚪 逻辑猜门游戏</h1>
 
-  <!-- ===== 游戏说明区 ===== -->
-  <div class="card rules">
-    <h2>📖 游戏说明</h2>
-    <p>1. 共有 <strong>4 扇门</strong>（1、2、3、4），其中一扇是通关门。</p>
-    <p>2. 你可以提问 <strong>5 次</strong>，每次选两扇门，问"X 和 Y 里面有没有通关门？"</p>
-    <p>3. 系统回答【是】或【不是】，但<span class="highlight">恰好说谎 1 次</span>，其余 4 次全是真话。</p>
-    <p>4. 根据 5 轮回答推理出通关门，提交你的猜测！</p>
-  </div>
+<div class="main">
 
-  <!-- ===== 提问选择区 ===== -->
-  <div class="card">
-    <h2>❓ 提问区</h2>
-    <div class="status-bar">
-      <span class="status-tag tag-questions" id="questionCount">已提问 0 / 5</span>
-      <span class="status-tag tag-phase" id="phaseTag">提问阶段</span>
+    <div onclick="left()" class="left">
+        <div class="left-main">
+            
+            <div  class="logo" style="background-image: url(favicon.ico);">
+                <!-- 头像挂件 -->
+                <!-- <img style="display: none; position: absolute;top:-15%;left:-10%;width: 120%; aspect-ratio: 1/1;" src="" alt="avatar"> -->
+            </div>
+            
+            <div class="left-div left-des">
+                <div class="left-div-item">
+                    <svg t="1705773709627" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="1478" width="20px" height="20px">
+                        <path
+                            d="M512 249.976471c-99.388235 0-180.705882 81.317647-180.705882 180.705882s81.317647 180.705882 180.705882 180.705882 180.705882-81.317647 180.705882-180.705882-81.317647-180.705882-180.705882-180.705882z m0 301.17647c-66.258824 0-120.470588-54.211765-120.470588-120.470588s54.211765-120.470588 120.470588-120.470588 120.470588 54.211765 120.470588 120.470588-54.211765 120.470588-120.470588 120.470588z"
+                            fill="#2c2c2c" p-id="1479"></path>
+                        <path
+                            d="M512 39.152941c-216.847059 0-391.529412 174.682353-391.529412 391.529412 0 349.364706 391.529412 572.235294 391.529412 572.235294s391.529412-222.870588 391.529412-572.235294c0-216.847059-174.682353-391.529412-391.529412-391.529412z m0 891.482353C424.658824 873.411765 180.705882 686.682353 180.705882 430.682353c0-183.717647 147.576471-331.294118 331.294118-331.294118s331.294118 147.576471 331.294118 331.294118c0 256-243.952941 442.729412-331.294118 499.952941z"
+                            fill="#2c2c2c" p-id="1480"></path>
+                    </svg>
+                    <!-- Location label -->
+                    中国
+                </div>
+                <div class="left-div-item">
+                    <svg t="1705773906032" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="2474" width="20px" height="20px">
+                        <path
+                            d="M729.6 234.666667H294.4V157.866667a51.2 51.2 0 0 1 51.2-51.2h332.8a51.2 51.2 0 0 1 51.2 51.2v76.8z m179.2 51.2a51.2 51.2 0 0 1 51.2 51.2v512a51.2 51.2 0 0 1-51.2 51.2H115.2a51.2 51.2 0 0 1-51.2-51.2v-512a51.2 51.2 0 0 1 51.2-51.2h793.557333z m-768 172.032c0 16.384 13.312 29.696 29.696 29.696h683.008a29.696 29.696 0 1 0 0-59.392H170.410667a29.696 29.696 0 0 0-29.696 29.696z m252.416 118.784c0 16.384 13.312 29.696 29.696 29.696h178.176a29.696 29.696 0 1 0 0-59.392H422.912a29.738667 29.738667 0 0 0-29.696 29.696z"
+                            fill="#666666" p-id="2475"></path>
+                    </svg>
+                    <!-- School label -->
+                    家里蹲
+                </div>
+            </div>
+            <div class="left-div left-tag">
+                <div class="left-tag-item">混吃等死</div>
+                <div class="left-tag-item">骂人</div>
+                <div class="left-tag-item">我的世界</div>
+                <div class="left-tag-item">瓦洛兰特</div>
+                <div class="left-tag-item">三角洲</div>
+            </div>
+
+
+            <div class="left-div left-time">
+                <ul id="line">
+                    <li>
+                        <div class="focus"></div>
+                        <div>2025-12-5</div>
+                        <div>未完待续</div>
+                    </li>
+                    
+                    <li>
+                        <div class="focus"></div>
+                        <div>2025-12-5</div>
+                        <div>更改了新首页</div>
+                    </li>
+                    <li>
+                        <div class="focus"></div>
+                        <div>2025-12-5</div>
+                        <div>搭建了我的博客</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <div class="question-area">
-      <div class="select-row">
-        <label>门 A：</label>
-        <select id="doorA">
-          <option value="1">1 号门</option>
-          <option value="2">2 号门</option>
-          <option value="3">3 号门</option>
-          <option value="4">4 号门</option>
-        </select>
-        <label>门 B：</label>
-        <select id="doorB">
-          <option value="1">1 号门</option>
-          <option value="2" selected>2 号门</option>
-          <option value="3">3 号门</option>
-          <option value="4">4 号门</option>
-        </select>
-      </div>
-      <div>
-        <button class="btn btn-primary" id="askBtn" onclick="askQuestion()">提 问</button>
-      </div>
-    </div>
-  </div>
+    <div class="right">
 
-  <!-- ===== 历史回答记录区 ===== -->
-  <div class="card">
-    <h2>📋 历史回答记录</h2>
-    <ul class="history-list" id="historyList">
-      <li class="empty-hint">暂无提问记录，开始你的第一次提问吧！</li>
-    </ul>
-  </div>
 
-  <!-- ===== 猜答案提交区 ===== -->
-  <div class="card">
-    <h2>🎯 提交猜测</h2>
-    <div class="guess-area">
-      <div class="guess-row">
-        <label style="font-size:0.9rem;color:#4a5568;font-weight:500;">选择门：</label>
-        <select id="guessDoor" disabled>
-          <option value="1">1 号门</option>
-          <option value="2">2 号门</option>
-          <option value="3">3 号门</option>
-          <option value="4">4 号门</option>
-        </select>
-        <button class="btn btn-success" id="guessBtn" onclick="submitGuess()" disabled>提交猜测</button>
-      </div>
-      <p style="font-size:0.82rem;color:#a0aec0;" id="guessHint">完成 5 次提问后解锁猜答案</p>
-    </div>
-  </div>
+        <header>
+            <div class="welcome">Hello, I'm <span class="gradientText">Ethereal 空灵</span></div>
+            <div class="description">👦 <span class="purpleText"> Student</span> 
+            </div>
+            <div class="description">📝 总有人间一两风
+                <span class="purpleText textBackground">理想</span>, 填我十万八千梦
+                <span class="purpleText textBackground">梦想</span>
+            </div>
+            <div class="iconContainer">
 
-  <!-- ===== 结果复盘区（默认隐藏） ===== -->
-  <div class="card" id="reviewCard" style="display:none;">
-    <h2>🔍 结果复盘</h2>
-    <div id="resultBanner"></div>
-    <div id="reviewContent"></div>
-    <div class="restart-area">
-      <button class="btn btn-warning" onclick="restartGame()">🔄 重新开始</button>
-    </div>
-  </div>
+                <!---->
+                
+                <!-- Github -->
+                <a class="iconItemLong" target="_blank" href="https://github.com/Ethereal">
+                    <svg t="1704870335945" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="2487" width="22px" height="22px">
+                        <path
+                            d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9 23.5 23.2 38.1 55.4 38.1 91v112.5c0.8 9 0 17.9 15 17.9 177.1-59.7 304.6-227 304.6-424.1 0-247.2-200.4-447.3-447.5-447.3z"
+                            fill="#000000" p-id="2488"></path>
+
+                    </svg>
+                    <div class="iconTip">Github</div>
+                </a>
+                <!---->
+                
+                <!-- twitter -->
+                <a class="iconItem" target="_blank" href="https://x.com/intent/user?screen_name=wuxiangfeng0915">
+                    <svg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg'>
+                        <path fill='currentColor' d='M22.212 5.656a8.384 8.384 0 0 1-2.401.658A4.195 4.195 0 0 0 21.649 4c-.82.488-1.719.83-2.655 1.015a4.182 4.182 0 0 0-7.126 3.814a11.874 11.874 0 0 1-8.621-4.37a4.168 4.168 0 0 0-.566 2.103c0 1.45.739 2.731 1.86 3.481a4.169 4.169 0 0 1-1.894-.523v.051a4.185 4.185 0 0 0 3.355 4.102a4.205 4.205 0 0 1-1.89.072A4.185 4.185 0 0 0 8.02 16.65a8.394 8.394 0 0 1-6.192 1.732a11.831 11.831 0 0 0 6.41 1.88c7.694 0 11.9-6.373 11.9-11.9c0-.18-.004-.362-.012-.541a8.497 8.497 0 0 0 2.086-2.164'/>
+                    </svg>
+                </a>
+
+                <!-- bilibili -->
+                <a class="iconItem" target="_blank" href="https://space.bilibili.com/488683560">
+                    <svg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg'>
+                        <path fill='currentColor' d='M18.223 3.086a1.25 1.25 0 0 1 0 1.768L17.08 5.996h1.17A3.75 3.75 0 0 1 22 9.746v7.5a3.75 3.75 0 0 1-3.75 3.75H5.75A3.75 3.75 0 0 1 2 17.246v-7.5a3.75 3.75 0 0 1 3.75-3.75h1.166L5.775 4.855a1.25 1.25 0 0 1 1.767-1.768l2.652 2.651c.079.08.145.166.198.258h3.213c.053-.092.12-.18.199-.259l2.651-2.651a1.25 1.25 0 0 1 1.768 0Zm.027 5.42H5.75a1.25 1.25 0 0 0-1.247 1.157l-.003.093v7.5c0 .66.51 1.2 1.157 1.247l.093.003h12.5a1.25 1.25 0 0 0 1.247-1.156l.003-.094v-7.5c0-.69-.56-1.25-1.25-1.25Zm-10 2.5c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 0 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25Zm7.5 0c.69 0 1.25.56 1.25 1.25v1.25a1.25 1.25 0 0 1-2.5 0v-1.25c0-.69.56-1.25 1.25-1.25Z'/>
+                    </svg>
+                </a>
+
+                <!-- email -->
+                <!-- <a class="iconItem" target="_blank" href="mailto:Ethereal0915@qq.com">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 4l-8 5l-8-5V6l8 5l8-5z"/></svg>
+                </a>
+
+                                <a class="iconItem" target="_blank" href="https://t.me/Ethereal0803">
+                    <svg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg'>
+                        <path fill='currentColor' d='M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z'/>
+                    </svg>
+                </a> -->
+
+                <!-- sponsor -->
+                <!-- <a class="iconItem" target="_blank" onclick="PopUp('./static/img/sponsor.jpg')">
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.8401 19.345H15.9101C17.4101 19.385 18.6101 20.605 18.6101 22.105C18.6101 23.385 17.7401 24.455 16.5601 24.775V25.895C16.5601 26.295 16.2401 26.615 15.8401 26.615C15.4401 26.615 15.1201 26.295 15.1201 25.895V24.775C13.9401 24.455 13.0701 23.385 13.0701 22.105C13.0701 21.705 13.3901 21.385 13.7901 21.385C14.1901 21.385 14.5101 21.705 14.5101 22.105C14.5101 22.845 15.1001 23.435 15.8301 23.435C16.5601 23.435 17.1601 22.835 17.1601 22.105C17.1601 21.375 16.5601 20.775 15.8301 20.775H15.7601C14.2701 20.735 13.0701 19.515 13.0701 18.015C13.0701 16.735 13.9401 15.665 15.1201 15.345V14.225C15.1201 13.825 15.4401 13.505 15.8401 13.505C16.2401 13.505 16.5601 13.825 16.5601 14.225V15.345C17.7401 15.665 18.6101 16.735 18.6101 18.015C18.6101 18.415 18.2901 18.735 17.8901 18.735C17.4901 18.735 17.1701 18.415 17.1701 18.015C17.1701 17.285 16.5701 16.685 15.8401 16.685C15.1101 16.685 14.5101 17.285 14.5101 18.015C14.5101 18.745 15.1101 19.345 15.8401 19.345Z" fill="#212121"/>
+                        <path d="M10.532 5.09995L13.3181 8.35983L13.0166 8.69618C7.28298 9.98229 3 15.1026 3 21.2249C3 26.6072 7.36772 30.9749 12.75 30.9749H18.92C24.3018 30.9749 28.6692 26.608 28.67 21.2264C28.6794 15.1029 24.3969 9.98239 18.6634 8.69621C18.6678 8.65637 18.67 8.61592 18.67 8.57497C18.67 8.39779 18.6278 8.2299 18.553 8.08084L20.923 5.36795L21.076 5.13195C21.2547 4.74228 21.3004 4.30471 21.2061 3.88653C21.1118 3.46835 20.8827 3.09273 20.5541 2.81742C20.2256 2.54212 19.8156 2.38239 19.3874 2.36279C18.9592 2.34319 18.5364 2.46481 18.184 2.70895L17.341 1.70895C17.152 1.49719 16.9204 1.32767 16.6615 1.21144C16.4025 1.09522 16.122 1.0349 15.8381 1.03443C15.5543 1.03395 15.2735 1.09334 15.0142 1.2087C14.7548 1.32407 14.5227 1.49282 14.333 1.70395L13.45 2.68995C13.0985 2.44074 12.6748 2.31426 12.2442 2.3301C11.8137 2.34594 11.4003 2.5032 11.0681 2.77756C10.7359 3.05192 10.5034 3.42809 10.4065 3.8479C10.3096 4.2677 10.3537 4.70774 10.532 5.09995ZM14.331 6.48495L12.635 4.52595C13.029 4.71581 13.4748 4.76972 13.9028 4.67925C14.3307 4.58879 14.7165 4.35904 15 4.02595L15.8 2.98695L16.688 4.03895C16.9649 4.36093 17.3384 4.58483 17.7528 4.67727C18.1673 4.76971 18.6005 4.72576 18.988 4.55195L17.3 6.48495H14.331ZM5 21.2249C5 15.2372 9.85228 10.3849 15.84 10.3849C21.828 10.3849 26.6792 15.2371 26.67 21.2234L26.67 21.2249C26.67 25.5026 23.1977 28.9749 18.92 28.9749H12.75C8.47228 28.9749 5 25.5026 5 21.2249Z" fill="#212121"/>
+                    </svg>
+                </a> -->
+
+                <!-- sidebar for mobiles -->
+                <a class="iconItem" href="javascript:void(0)" onclick="left()">
+                    <svg t="1706175679525" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="1880" width="22px" height="22px">
+                        <path
+                            d="M389.2 98.93H189.43c-49.51 0-89.8 40.28-89.8 89.8V388.5c0 49.51 40.28 89.8 89.8 89.8H389.2c49.51 0 89.8-40.28 89.8-89.8V188.72c0-49.51-40.28-89.79-89.8-89.79z m29.93 289.56c0 16.5-13.43 29.93-29.93 29.93H189.43c-16.5 0-29.93-13.43-29.93-29.93V188.72c0-16.5 13.43-29.93 29.93-29.93H389.2c16.5 0 29.93 13.43 29.93 29.93v199.77zM389.2 547.34H189.43c-49.51 0-89.8 40.28-89.8 89.8v199.77c0 49.51 40.28 89.8 89.8 89.8H389.2c49.51 0 89.8-40.28 89.8-89.8V637.14c0-49.51-40.28-89.8-89.8-89.8z m29.93 289.57c0 16.5-13.43 29.93-29.93 29.93H189.43c-16.5 0-29.93-13.43-29.93-29.93V637.14c0-16.5 13.43-29.93 29.93-29.93H389.2c16.5 0 29.93 13.43 29.93 29.93v199.77zM837.56 98.93H637.79c-49.51 0-89.8 40.28-89.8 89.8V388.5c0 49.51 40.28 89.8 89.8 89.8h199.77c49.51 0 89.8-40.28 89.8-89.8V188.72c0-49.51-40.28-89.79-89.8-89.79z m29.93 289.56c0 16.5-13.43 29.93-29.93 29.93H637.79c-16.5 0-29.93-13.43-29.93-29.93V188.72c0-16.5 13.43-29.93 29.93-29.93h199.77c16.5 0 29.93 13.43 29.93 29.93v199.77zM837.56 547.34H637.79c-49.51 0-89.8 40.28-89.8 89.8v199.77c0 49.51 40.28 89.8 89.8 89.8h199.77c49.51 0 89.8-40.28 89.8-89.8V637.14c0-49.51-40.28-89.8-89.8-89.8z m29.93 289.57c0 16.5-13.43 29.93-29.93 29.93H637.79c-16.5 0-29.93-13.43-29.93-29.93V637.14c0-16.5 13.43-29.93 29.93-29.93h199.77c16.5 0 29.93 13.43 29.93 29.93v199.77z"
+                            p-id="1881" fill="#000000"></path>
+                    </svg>
+                </a>
+
+                <!-- switch -->
+                <a class="iconItem switch" href="javascript:void(0)">
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+                    <label class="onoffswitch-label" for="myonoffswitch">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+                </a>
+                <!---->
+            </div>
+
+            <!-- <div class="tanChiShe">
+                <img id="tanChiShe" src="https://ghfast.top/https://raw.githubusercontent.com/bilicapr/bilicapr/output/github-contribution-grid-snake-dark.svg" alt="">
+            </div> -->
+        </header>
+
+        <!-- Tab buttons -->
+   <div class="button-container">
+    <button class="tab-button but-active" onclick="openTab('tab1')">我的作品</button>
+    <button class="tab-button" onclick="openTab('tab2')">关于我</button>
+    <button class="tab-button" onclick="openTab('tab3')">常见问题</button>
 </div>
 
-<script>
-// ============================================================
-// 游戏状态管理
-// ============================================================
-let gameState = {
-  correctDoor: 0,       // 正确通关门 (1-4)
-  lieRound: 0,          // 说谎的轮次 (1-5)
-  questionsAsked: 0,    // 已提问次数
-  history: [],          // 历史记录 [{round, doorA, doorB, realAnswer, systemAnswer, isLie}]
-  gameOver: false,      // 游戏是否结束
-  playerGuess: null     // 玩家猜测
-};
+        <div id="tab1" class="tab-content content-active">
+            <div class="title">
+                <svg t="1705257422086" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="1891" width="26px" height="26px">
+                    <path
+                        d="M629.333333 202.666667v213.333333h277.333334v448h-512v-213.333333h-277.333334v-448h512z m213.333334 277.333333h-213.333334v170.666667h-170.666666v149.333333h384v-320z m-277.333334-213.333333h-384v320h213.333334v-170.666667h170.666666v-149.333333z m0 213.333333h-106.666666v106.666667h106.666666v-106.666667z"
+                        fill="#000000" p-id="1892"></path>
+                </svg>
+                网站
+            </div>
+            <div class="projectList">
+                <!-- 项目列表开始 -->
+                <!---->
+                <a class="projectItem" target="_blank" href="https://www.pixiv.net">
+                    <div class="projectItemLeft">
+                        <h1>Pixiv</h1>
+                        <p>插画</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/blog.svg" alt="">
+                    </div>
+                </a>
 
-// ============================================================
-// 初始化 / 重新开始游戏
-// ============================================================
-function initGame() {
-  // 随机生成正确门 (1-4)
-  gameState.correctDoor = Math.floor(Math.random() * 4) + 1;
-  // 随机选定说谎轮次 (1-5)
-  gameState.lieRound = Math.floor(Math.random() * 5) + 1;
-  gameState.questionsAsked = 0;
-  gameState.history = [];
-  gameState.gameOver = false;
-  gameState.playerGuess = null;
+                <a class="projectItem" target="_blank" href="https://www.deepseek.com">
+                    <div class="projectItemLeft">
+                        <h1>deepseek</h1>
+                        <p>AI的深度探索</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/server.svg" alt="">
+                    </div>
+                </a>
 
-  // 重置UI
-  document.getElementById('doorA').value = '1';
-  document.getElementById('doorB').value = '2';
-  document.getElementById('guessDoor').value = '1';
-  document.getElementById('askBtn').disabled = false;
-  document.getElementById('doorA').disabled = false;
-  document.getElementById('doorB').disabled = false;
-  document.getElementById('guessBtn').disabled = true;
-  document.getElementById('guessDoor').disabled = true;
-  document.getElementById('guessHint').textContent = '完成 5 次提问后解锁猜答案';
-  document.getElementById('reviewCard').style.display = 'none';
-  document.getElementById('phaseTag').textContent = '提问阶段';
-  document.getElementById('phaseTag').className = 'status-tag tag-phase';
+                <!-- <a class="projectItem" target="_blank" href="https://file.imly.cc">
+                    <div class="projectItemLeft">
+                        <h1>File Sharing</h1>
+                        <p>文件分享</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/file.svg" alt="">
+                    </div>
+                </a> -->
 
-  updateQuestionCount();
-  renderHistory();
-}
+                 <!--<a class="projectItem" target="_blank" href="https://neip.top"> 
+                    <div class="projectItemLeft">
+                        <h1>Hypixel proxy</h1>
+                        <p>Hypixel加速IP</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/hypixel.svg" alt="">
+                    </div>
+                </a> -->
 
-// ============================================================
-// 更新提问计数显示
-// ============================================================
-function updateQuestionCount() {
-  document.getElementById('questionCount').textContent =
-    `已提问 ${gameState.questionsAsked} / 5`;
-}
 
-// ============================================================
-// 提问逻辑
-// ============================================================
-function askQuestion() {
-  if (gameState.gameOver) return;
-  if (gameState.questionsAsked >= 5) return;
+                <!---->
+            </div>
+           <!--<div class="title">
+                <svg t="1705257422086" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="1891" width="26px" height="26px">
+                    <path
+                        d="M629.333333 202.666667v213.333333h277.333334v448h-512v-213.333333h-277.333334v-448h512z m213.333334 277.333333h-213.333334v170.666667h-170.666666v149.333333h384v-320z m-277.333334-213.333333h-384v320h213.333334v-170.666667h170.666666v-149.333333z m0 213.333333h-106.666666v106.666667h106.666666v-106.666667z"
+                        fill="#000000" p-id="1892"></path>
+                </svg>
+                Projects
+            </div>
+            <div class="projectList">
+                <a class="projectItem" target="_blank" href="https://github.com/xxynet/NCM-Downloader">
+                    <div class="projectItemLeft">
+                        <h1>NCM Downloader</h1>
+                        <p>A powerful NCM Donwloader that supports built-in metadata</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/music.svg" alt="">
+                    </div>
+                </a>
 
-  const doorA = parseInt(document.getElementById('doorA').value);
-  const doorB = parseInt(document.getElementById('doorB').value);
+                <a class="projectItem" target="_blank" href="https://github.com/xxynet/HomePage">
+                    <div class="projectItemLeft">
+                        <h1>HomePage</h1>
+                        <p>An elegant personal honepage</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/home.svg" alt="">
+                    </div>
+                </a>
 
-  // 校验：两扇门不能相同
-  if (doorA === doorB) {
-    alert('请选择两扇不同的门！');
-    return;
-  }
+                <a class="projectItem" target="_blank" href="https://github.com/xxynet/ncm-dl-docker">
+                    <div class="projectItemLeft">
+                        <h1>ncm-dl-docker</h1>
+                        <p>Docker version of NCM-Downloader</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/music.svg" alt="">
+                    </div>
+                </a>
 
-  const currentRound = gameState.questionsAsked + 1;
+                <a class="projectItem" target="_blank" href="https://github.com/xxynet/device-status">
+                    <div class="projectItemLeft">
+                        <h1>device-status</h1>
+                        <p>An elegant web page that displays your devices' status</p>
+                    </div>
+                    <div class="projectItemRight">
+                        <img src="./static/img/info.svg" alt="">
+                    </div>
+                </a> 
+                
+            </div> -->
+            <!-- xiucatYouTube,bebilicapr -->
+             <!-- youdong1anytls://c605bffe-8dd2-42c7-acc2-63722f3420fa@158.51.110.91:10001?security=tls&fp=firefox&insecure=1&allowInsecure=1&type=tcp#%E6%97%A5%E6%9C%AC%E4%B8%9C%E4%BA%ACIIJ-Minidogtoo1-->
+            <div class="title">
+                <svg t="1705257823317" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="7833" width="26px" height="26px">
+                    <path
+                        d="M395.765333 586.570667h-171.733333c-22.421333 0-37.888-22.442667-29.909333-43.381334L364.768 95.274667A32 32 0 0 1 394.666667 74.666667h287.957333c22.72 0 38.208 23.018667 29.632 44.064l-99.36 243.882666h187.050667c27.509333 0 42.186667 32.426667 24.042666 53.098667l-458.602666 522.56c-22.293333 25.408-63.626667 3.392-54.976-29.28l85.354666-322.421333zM416.714667 138.666667L270.453333 522.581333h166.869334a32 32 0 0 1 30.933333 40.181334l-61.130667 230.954666 322.176-367.114666H565.312c-22.72 0-38.208-23.018667-29.632-44.064l99.36-243.882667H416.714667z"
+                        fill="#000000" p-id="7834"></path>
+                </svg>
+                技能
+            </div>
+            <div class="skill">
+                <!-- 前往https://skillicons.dev/ 生成，一个pc端，一个移动端，区别是一行的个数 -->
+                <img id="skillPc" src="./static/svg/skillPc.svg" alt="" srcset="">
+                <img id="skillWap" src="./static/svg/skillWap.svg" alt="" srcset="">
+            </div>
+        </div>
 
-  // 计算真实答案：正确门是否在 {doorA, doorB} 中
-  const realAnswer = (gameState.correctDoor === doorA || gameState.correctDoor === doorB);
+        <div id="tab2" class="tab-content">
+            <div class="title">
+                <svg t="1705257422086" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="1891" width="26px" height="26px">
+                    <path
+                        d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"
+                        fill="#000000" p-id="1892"></path>
+                    <path
+                        d="M464 688a48 48 0 1 0 96 0 48 48 0 1 0-96 0zm24-112h48c4.4 0 8-3.6 8-8V296c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8z"
+                        fill="#000000" p-id="1893"></path>
+                </svg>
+                介绍
+            </div>
+            <div class="intro-content">
+                <p>你好，我是空灵</p>
 
-  // 判断当前轮是否为说谎轮
-  const isLie = (currentRound === gameState.lieRound);
+                <ul class="intro-ul">
+                    <li>我的<a class="highlight-link" target="_blank" href="https://github.com/Ethereal0915">Github</a>仓库</li>
+                    <li>会拍照，打游戏，吃饭，睡觉，洗澡，走路，等基础</li>
+                    <li>其他什么都不懂</li>
+                </ul>
 
-  // 系统回答：说谎轮输出相反答案
-  const systemAnswer = isLie ? !realAnswer : realAnswer;
+                <h3>我的兴趣</h3>
+                <ul class="intro-ul">
+                    <li>没有兴趣</li>
+                </ul>
 
-  // 记录历史
-  gameState.history.push({
-    round: currentRound,
-    doorA: doorA,
-    doorB: doorB,
-    realAnswer: realAnswer,
-    systemAnswer: systemAnswer,
-    isLie: isLie
-  });
+                <h3>语言能力</h3>
+                <p>只会中文</p>
+            </div>
+        </div>
 
-  gameState.questionsAsked++;
-  updateQuestionCount();
-  renderHistory();
+        <div id="tab3" class="tab-content">
+            <div class="title">
+                <svg t="1705257422086" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="1891" width="26px" height="26px">
+                    <path
+                        d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"
+                        fill="#000000" p-id="1892"></path>
+                    <path
+                        d="M464 688a48 48 0 1 0 96 0 48 48 0 1 0-96 0zm24-112h48c4.4 0 8-3.6 8-8V296c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8z"
+                        fill="#000000" p-id="1893"></path>
+                </svg>
+                FAQ
+            </div>
+            <div class="faq-container">
+                <!-- <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>你从何时开始学习编程?</span>
+                        <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>我小学开始学习了Python和HTML，我的HTML是一位<span class="highlight-text">ICQ</span>熟悉的陌生人教我的,之后我就觉得代码的世界十分的好...</p>
+                    </div>
+                </div> -->
 
-  // 5次提问用完，解锁猜答案
-  if (gameState.questionsAsked >= 5) {
-    document.getElementById('askBtn').disabled = true;
-    document.getElementById('doorA').disabled = true;
-    document.getElementById('doorB').disabled = true;
-    document.getElementById('guessBtn').disabled = false;
-    document.getElementById('guessDoor').disabled = false;
-    document.getElementById('guessHint').textContent = '5 次提问已用完，请提交你的猜测！';
-    document.getElementById('phaseTag').textContent = '猜测阶段';
-  }
-}
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>如何联系我?</span>
+                        <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>可以从TG联系到我</p>
+                    </div>
+                </div>
 
-// ============================================================
-// 渲染历史记录
-// ============================================================
-function renderHistory() {
-  const list = document.getElementById('historyList');
+                <!-- <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How did you fall into the rabbit hole of language learning?</span>
+                        <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>inspired by <a class="highlight-link" target="_blank" href="https://www.bilibili.com/video/BV1ns4y1A7fj/">this vid</a> & yt vids related to comprehensible input</p>
+                    </div>
+                </div> -->
 
-  if (gameState.history.length === 0) {
-    list.innerHTML = '<li class="empty-hint">暂无提问记录，开始你的第一次提问吧！</li>';
-    return;
-  }
+                <!-- <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What languages can you speak?</span>
+                        <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>I'm a native Chinese speaker, I can understand English well (though my speaking needs improvement), and I'm learning Japanese. I'm passionate about language learning and cultural exchange.</p>
+                    </div>
+                </div> -->
+            </div>
+        </div>
 
-  list.innerHTML = gameState.history.map(item => {
-    const answerText = item.systemAnswer ? '是' : '不是';
-    const answerClass = item.systemAnswer ? 'answer-yes' : 'answer-no';
-    return `
-      <li class="history-item">
-        <span class="round-num">第${item.round}轮</span>
-        <span class="question-text">${item.doorA} 和 ${item.doorB} 里有通关门吗？</span>
-        <span class="answer ${answerClass}">${answerText}</span>
-      </li>
-    `;
-  }).join('');
-}
+        <footer>
+            © 2024-2025 Caleb XXY &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a href="https://github.com/xxynet/HomePage" target="_blank" class="footer-links">SourceCode</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a target="_blank" class="footer-links">爱来自 Cloudflare&nbsp;&nbsp;|&nbsp;&nbsp;Github</a>
+        </footer>
 
-// ============================================================
-// 提交猜测
-// ============================================================
-function submitGuess() {
-  if (gameState.gameOver) return;
-  if (gameState.questionsAsked < 5) return;
+    </div>
+</div> <!-- main结束 -->
+<!--弹窗-->
 
-  const guess = parseInt(document.getElementById('guessDoor').value);
-  gameState.playerGuess = guess;
-  gameState.gameOver = true;
+<div class="pop-up">
+    <div class="pop-up-main">
+        <img class="pop-up-img" src="" alt="" srcset="">
+    </div>
+    <div onclick="PopUp()" class="pop-up-close">
+        <svg t="1700047644371" class="icon" viewBox="0 0 1024 1024" version="1.1"
+            xmlns="http://www.w3.org/2000/svg" p-id="950" width="19px" height="19px">
+            <path
+                d="M610.616405 512.423878l391.647127 391.939565a68.722849 68.722849 0 0 1 0 98.332161 72.012772 72.012772 0 0 1-100.306115 0l-390.404267-391.354689-392.012675 391.28158a69.74638 69.74638 0 0 1-98.551489-98.551489l391.793346-391.720237L20.988986 119.533891A69.74638 69.74638 0 0 1 119.540475 20.982402l392.158893 392.451331L901.957417 23.248793a72.012772 72.012772 0 0 1 100.306115 0 68.722849 68.722849 0 0 1 0 98.332161L610.616405 512.423878z"
+                p-id="951" fill="#000000"></path>
+        </svg>
+    </div>
+</div>
 
-  showReview();
-}
+<script src="./static/js/script.js?v=1.33"> </script>
 
-// ============================================================
-// 展示复盘
-// ============================================================
-function showReview() {
-  const isWin = (gameState.playerGuess === gameState.correctDoor);
-
-  // 结果横幅
-  const banner = document.getElementById('resultBanner');
-  if (isWin) {
-    banner.innerHTML = `<div class="result-banner result-win">🎉 恭喜你猜对了！通关门就是 ${gameState.correctDoor} 号门</div>`;
-  } else {
-    banner.innerHTML = `<div class="result-banner result-lose">😢 很遗憾猜错了。你猜的是 ${gameState.playerGuess} 号门，正确通关门是 ${gameState.correctDoor} 号门</div>`;
-  }
-
-  // 复盘表格
-  let tableHTML = `
-    <table class="review-table">
-      <thead>
-        <tr>
-          <th>轮次</th>
-          <th>提问（门A & 门B）</th>
-          <th>真实答案</th>
-          <th>系统回答</th>
-          <th>是否说谎</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  gameState.history.forEach(item => {
-    const realText = item.realAnswer ? '是' : '不是';
-    const sysText = item.systemAnswer ? '是' : '不是';
-    const lieClass = item.isLie ? 'lie-yes' : 'lie-no';
-    const lieText = item.isLie ? '说谎' : '真话';
-    const rowClass = item.isLie ? 'lie-row' : '';
-    tableHTML += `
-      <tr class="${rowClass}">
-        <td>第${item.round}轮</td>
-        <td>${item.doorA} & ${item.doorB}</td>
-        <td>${realText}</td>
-        <td><strong>${sysText}</strong></td>
-        <td><span class="lie-badge ${lieClass}">${lieText}</span></td>
-      </tr>
-    `;
-  });
-
-  tableHTML += `
-      </tbody>
-    </table>
-    <p style="margin-top:10px;font-size:0.88rem;color:#718096;">
-      💡 系统在 <strong>第 ${gameState.lieRound} 轮</strong> 说了谎。
-    </p>
-  `;
-
-  // 推理过程
-  tableHTML += generateReasoning();
-
-  document.getElementById('reviewContent').innerHTML = tableHTML;
-  document.getElementById('reviewCard').style.display = 'block';
-
-  // 滚动到复盘区
-  document.getElementById('reviewCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ============================================================
-// 生成推理过程
-// 逻辑：对每扇候选门，检查是否存在一个谎言位使得所有回答自洽
-// ============================================================
-function generateReasoning() {
-  const doors = [1, 2, 3, 4];
-  const possibleDoors = [];
-  const impossibleDoors = [];
-  const reasoningDetails = {};
-
-  doors.forEach(door => {
-    // 对这扇门作为正确门，检查每一轮的真实答案
-    // 真实答案 = 该门是否在提问的两扇门中
-    // 如果系统回答与真实答案不一致，该轮必须是谎言
-    // 恰好有1个谎言 → 不一致的轮次必须恰好为1
-    let mismatchRounds = [];
-    gameState.history.forEach(item => {
-      const realForThisDoor = (door === item.doorA || door === item.doorB);
-      if (realForThisDoor !== item.systemAnswer) {
-        mismatchRounds.push(item.round);
-      }
-    });
-
-    reasoningDetails[door] = {
-      mismatchRounds: mismatchRounds,
-      possible: mismatchRounds.length === 1
-    };
-
-    if (mismatchRounds.length === 1) {
-      possibleDoors.push(door);
-    } else {
-      impossibleDoors.push(door);
-    }
-  });
-
-  // 构建推理文本
-  let html = '<div class="reasoning-box">';
-  html += '<h3>🧠 推理过程</h3>';
-  html += '<p>规则：系统恰好说谎 1 次。对每扇候选门，假设它是正确门，逐轮比对"真实答案"与"系统回答"，不一致的轮次即为谎言。<strong>只有不一致轮次恰好为 1 的门才可能是正确门。</strong></p>';
-
-  // 逐门分析
-  doors.forEach(door => {
-    const detail = reasoningDetails[door];
-    const statusClass = detail.possible ? 'door-possible' : 'door-impossible';
-    const statusText = detail.possible ? '可能' : '排除';
-    let mismatchText = '';
-    if (detail.mismatchRounds.length === 0) {
-      mismatchText = '0 轮不一致（需要恰好1次谎言，不满足）';
-    } else if (detail.mismatchRounds.length === 1) {
-      mismatchText = `第 ${detail.mismatchRounds[0]} 轮不一致（即谎言在第${detail.mismatchRounds[0]}轮）`;
-    } else {
-      mismatchText = `第 ${detail.mismatchRounds.join('、')} 轮不一致（超过1次谎言，不可能）`;
-    }
-    html += `<p><span class="door-check ${statusClass}">${door}号门：${statusText}</span> ${mismatchText}</p>`;
-  });
-
-  // 结论
-  html += '<p style="margin-top:10px;font-weight:600;">';
-  if (possibleDoors.length === 1) {
-    html += `✅ 结论：唯一可能的通关门是 <strong>${possibleDoors[0]} 号门</strong>。`;
-  } else if (possibleDoors.length > 1) {
-    html += `⚠️ 注意：当前提问组合下，${possibleDoors.map(d => d + '号门').join('、')} 均有可能（信息不足），需要运气或更优的提问策略。`;
-  } else {
-    html += `❌ 逻辑异常：没有门满足条件（不应出现）。`;
-  }
-  html += '</p>';
-  html += '</div>';
-
-  return html;
-}
-
-// ============================================================
-// 重新开始
-// ============================================================
-function restartGame() {
-  initGame();
-  // 滚动到顶部
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ============================================================
-// 页面加载完成后初始化游戏
-// ============================================================
-window.onload = function() {
-  initGame();
-};
-</script>
 </body>
-</html>
 
+</html>
